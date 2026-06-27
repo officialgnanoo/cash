@@ -33,7 +33,6 @@
     align-items: center;
   }
 
-  /* ── HEADER ── */
   header {
     width: 100%;
     background: var(--surface);
@@ -68,9 +67,6 @@
   }
   #btn-logout:hover { border-color: var(--red); color: var(--red); }
 
-  /* ══════════════════════════════════════
-     LANDING PAGE (صفحة الترحيب)
-  ══════════════════════════════════════ */
   #page-landing {
     width: 100%;
     max-width: 480px;
@@ -117,7 +113,6 @@
   .hero-stat .big { font-size: 1.4rem; font-weight: 900; color: var(--gold); }
   .hero-stat .sm  { font-size: .72rem; opacity: .8; margin-top: 2px; }
 
-  /* بطاقة التسجيل/الدخول */
   .auth-card {
     width: 100%;
     background: var(--card);
@@ -152,7 +147,6 @@
   .auth-panel { display: none; padding: 26px; }
   .auth-panel.active { display: block; }
 
-  /* ── FORM ── */
   .form-group { margin-bottom: 18px; }
   label {
     display: block;
@@ -184,7 +178,6 @@
     line-height: 1.5;
   }
 
-  /* ── BUTTONS ── */
   .btn {
     width: 100%;
     padding: 14px;
@@ -209,7 +202,6 @@
   }
   .btn-ghost:hover { border-color: var(--blue); background: rgba(24,119,242,.05); }
 
-  /* ── ALERT ── */
   .alert {
     padding: 13px 16px;
     border-radius: 10px;
@@ -224,9 +216,6 @@
   .alert.info    { background: rgba(24,119,242,.12); border: 1px solid var(--blue);  color: #6ba3ff; }
   .alert.show    { display: block; }
 
-  /* ══════════════════════════════════════
-     TASKS PAGE (صفحة المهام)
-  ══════════════════════════════════════ */
   #page-tasks {
     display: none;
     width: 100%;
@@ -235,7 +224,6 @@
     padding: 20px 16px 40px;
   }
 
-  /* بطاقة النقاط */
   .points-header {
     background: linear-gradient(135deg, #1c2333, #0d1117);
     border: 1px solid var(--gold);
@@ -252,9 +240,7 @@
   .pts-left .pts-big { font-size: 2.6rem; font-weight: 900; color: var(--gold); line-height: 1; }
   .pts-left .pts-sub { font-size: .78rem; color: var(--muted); margin-top: 4px; }
   .pts-right { text-align: left; }
-  .progress-wrap {
-    width: 160px;
-  }
+  .progress-wrap { width: 160px; }
   .progress-bar {
     height: 8px;
     background: var(--border);
@@ -280,7 +266,6 @@
     margin-top: 8px;
   }
 
-  /* قسم المهام */
   .section-title {
     font-size: 1rem;
     font-weight: 700;
@@ -296,7 +281,6 @@
     background: var(--border);
   }
 
-  /* كارد المهمة */
   .task-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -379,7 +363,6 @@
   }
   .copy-btn:hover { background: var(--border); color: var(--text); }
 
-  /* زرار التحقق */
   .task-action-btn {
     width: 100%;
     padding: 12px;
@@ -400,7 +383,6 @@
   .task-action-btn:hover  { background: var(--blue-dk); }
   .task-action-btn:active { transform: scale(.98); }
 
-  /* حالة التحقق */
   .verify-status {
     display: none;
     align-items: center;
@@ -416,7 +398,6 @@
   .verify-status.pending  { background: rgba(245,166,35,.12); color: var(--gold); border: 1px solid rgba(245,166,35,.4); display: flex; }
   .verify-status.fail     { background: rgba(248,81,73,.12); color: var(--red); border: 1px solid var(--red); display: flex; }
 
-  /* loading skeleton */
   .skeleton {
     background: var(--card);
     border: 1px solid var(--border);
@@ -436,7 +417,6 @@
   .sk-line.w40 { width: 40%; }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
-  /* spinner */
   .spinner {
     display: inline-block;
     width: 15px; height: 15px;
@@ -451,7 +431,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* empty state */
   .empty-state {
     text-align: center;
     padding: 48px 20px;
@@ -461,7 +440,6 @@
   .empty-state h4 { font-size: 1rem; color: var(--text); margin-bottom: 6px; }
   .empty-state p  { font-size: .84rem; line-height: 1.7; }
 
-  /* modal */
   .modal-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,.7);
@@ -494,10 +472,10 @@
     .task-pts-badge { align-self: flex-start; }
   }
 </style>
+<base target="_blank">
 </head>
 <body>
 
-<!-- ══ HEADER ══ -->
 <header>
   <div class="logo-wrap">
     <div class="logo-icon">⭐</div>
@@ -509,9 +487,6 @@
   </div>
 </header>
 
-<!-- ══════════════════════════════════════════
-     LANDING PAGE
-══════════════════════════════════════════ -->
 <div id="page-landing">
 
   <div class="hero-mini">
@@ -529,14 +504,12 @@
     </div>
   </div>
 
-  <!-- بطاقة التسجيل والدخول -->
   <div class="auth-card">
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuth('login')">🔑 تسجيل دخول</button>
       <button class="auth-tab" onclick="switchAuth('register')">📝 حساب جديد</button>
     </div>
 
-    <!-- تسجيل دخول -->
     <div id="auth-login" class="auth-panel active">
       <div class="alert" id="login-alert"></div>
       <div class="form-group">
@@ -550,7 +523,6 @@
       <button class="btn" id="login-btn" onclick="loginUser()">دخول ←</button>
     </div>
 
-    <!-- تسجيل جديد -->
     <div id="auth-register" class="auth-panel">
       <div class="alert" id="reg-alert"></div>
       <div class="form-group">
@@ -584,12 +556,8 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     TASKS PAGE
-══════════════════════════════════════════ -->
 <div id="page-tasks">
 
-  <!-- نقاط المستخدم -->
   <div class="points-header">
     <div class="pts-left">
       <h3>نقاطك الحالية</h3>
@@ -607,17 +575,14 @@
     </div>
   </div>
 
-  <!-- المهام -->
   <div class="section-title">📋 المهام المتاحة</div>
   <div id="tasks-container">
-    <!-- skeleton loading -->
     <div class="skeleton"><div class="sk-line"></div><div class="sk-line w60"></div><div class="sk-line w40"></div></div>
     <div class="skeleton"><div class="sk-line"></div><div class="sk-line w60"></div><div class="sk-line w40"></div></div>
   </div>
 
 </div>
 
-<!-- ══ MODAL: تأكيد المهمة ══ -->
 <div class="modal-overlay" id="task-modal">
   <div class="modal">
     <h3>🔍 تأكيد تنفيذ المهمة</h3>
@@ -636,20 +601,14 @@
 </div>
 
 <script>
-// ════════════════════════════════
-// ⚙️ CONFIGURATION — غيّر هنا بس
-// ════════════════════════════════
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhKDxGpOS0sKb2J_OoWIsKxtE-3tvGfXnVyhHpBTxfJ_tH6rIAoOlEdAAXZ45qhVkA/exec";
-const POINTS_PER_ACTION = 5;   // نقاط لكل تفاعل
-const CASH_TARGET       = 50;  // هدف النقاط للكاش
-// ════════════════════════════════
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHBWmz-auWmKjZovMZFK3gLeFD03Y900eRLSxhP8LbONR3xLclghyxo_3zMOlbmRA/exec";
+const POINTS_PER_ACTION = 5;
+const CASH_TARGET       = 50;
 
-// ── STATE ──
-let currentUser  = null;   // { phone, name, points }
-let currentTask  = null;   // { taskId, type, pageUrl, title }
-let completedTasks = {};   // { taskId: true }
+let currentUser  = null;
+let currentTask  = null;
+let completedTasks = {};
 
-// ── UTILS ──
 function showAlert(id, msg, type) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -667,7 +626,6 @@ function setBtn(id, html, disabled) {
   b.disabled  = disabled;
 }
 
-// ── JSONP CALL ──
 function callScript(action, payload) {
   return new Promise((resolve, reject) => {
     const params  = new URLSearchParams({ action, ...payload });
@@ -695,9 +653,6 @@ function callScript(action, payload) {
   });
 }
 
-// ══════════════════════════════════════
-//  AUTH
-// ══════════════════════════════════════
 function switchAuth(tab) {
   document.querySelectorAll('.auth-tab').forEach((t, i) => {
     t.classList.toggle('active', (i === 0) === (tab === 'login'));
@@ -706,7 +661,6 @@ function switchAuth(tab) {
   document.getElementById('auth-register').classList.toggle('active', tab === 'register');
 }
 
-// تسجيل دخول
 async function loginUser() {
   hideAlert('login-alert');
   const username = document.getElementById('login-username').value.trim();
@@ -729,7 +683,6 @@ async function loginUser() {
   }
 }
 
-// تسجيل جديد
 async function registerUser() {
   hideAlert('reg-alert');
   const name     = document.getElementById('reg-name').value.trim();
@@ -776,9 +729,6 @@ function saveSession() {
   sessionStorage.setItem('np_user', JSON.stringify(currentUser));
 }
 
-// ══════════════════════════════════════
-//  ENTER APP — الدخول لصفحة المهام
-// ══════════════════════════════════════
 function enterApp() {
   document.getElementById('page-landing').style.display = 'none';
   document.getElementById('page-tasks').style.display   = 'block';
@@ -796,9 +746,6 @@ function updatePointsUI(pts) {
   document.getElementById('cash-badge').style.display = pts >= CASH_TARGET ? 'inline-block' : 'none';
 }
 
-// ══════════════════════════════════════
-//  LOAD TASKS — تحميل المهام من الشيت
-// ══════════════════════════════════════
 async function loadTasks() {
   const container = document.getElementById('tasks-container');
   container.innerHTML = `
@@ -809,7 +756,6 @@ async function loadTasks() {
     const res = await callScript('getTasks', { username: currentUser.username });
     completedTasks = res.completed || {};
     renderTasks(res.tasks || []);
-    // تحديث النقاط الحالية
     if (res.points !== undefined) {
       currentUser.points = Number(res.points);
       updatePointsUI(currentUser.points);
@@ -881,9 +827,6 @@ function copyLink(url, btn) {
   });
 }
 
-// ══════════════════════════════════════
-//  MODAL — تأكيد وإرسال المهمة
-// ══════════════════════════════════════
 function openTaskModal(taskId, type, pageUrl, title) {
   currentTask = { taskId, type, pageUrl, title };
   document.getElementById('modal-info').innerHTML =
@@ -891,7 +834,6 @@ function openTaskModal(taskId, type, pageUrl, title) {
   hideAlert('modal-alert');
   document.getElementById('modal-proof').value = '';
   document.getElementById('task-modal').classList.add('show');
-  // افتح الصفحة تلقائي
   window.open(pageUrl, '_blank');
 }
 
@@ -920,7 +862,6 @@ async function submitFromModal() {
       date: new Date().toLocaleString('ar-EG')
     });
 
-    // حدّث الواجهة
     completedTasks[currentTask.taskId] = true;
     const card = document.getElementById('card-' + currentTask.taskId);
     if (card) {
@@ -939,16 +880,13 @@ async function submitFromModal() {
   }
 }
 
-// ══════════════════════════════════════
-//  AUTO LOGIN من الـ session
-// ══════════════════════════════════════
 (function init() {
   const saved = sessionStorage.getItem('np_user');
   if (saved) {
     try {
       currentUser = JSON.parse(saved);
       enterApp();
-    } catch(e) { /* ignore */ }
+    } catch(e) {}
   }
 })();
 </script>
