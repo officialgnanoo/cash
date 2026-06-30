@@ -95,8 +95,8 @@ const App = {
       return;
     }
 
-    if (!/^\d{10,15}$/.test(phone.replace(/\s/g, ''))) {
-      this.showAlert('reg-alert', '⚠️ رقم هاتف غير صحيح', 'error');
+    if (!/^01\d{9}$/.test(phone.replace(/\s/g, ''))) {
+      this.showAlert('reg-alert', '⚠️ رقم الهاتف لازم يكون 11 رقم ويبدأ بـ 01', 'error');
       return;
     }
 
@@ -498,6 +498,124 @@ const App = {
     document.body.appendChild(container);
     return container;
   }
+  // ==================== FACEBOOK PROFILE CHECK ====================
+  fbCheckTimeout: null,
+
+  checkFacebookProfile(url) {
+    clearTimeout(this.fbCheckTimeout);
+
+    const preview = document.getElementById('fb-preview');
+    const errorDiv = document.getElementById('fb-error');
+    const previewImg = document.getElementById('fb-preview-img');
+    const previewName = document.getElementById('fb-preview-name');
+    const previewUrl = document.getElementById('fb-preview-url');
+    const previewBadge = document.getElementById('fb-preview-badge');
+    const previewStatus = document.getElementById('fb-preview-status');
+    const previewCard = document.querySelector('.fb-preview-card');
+
+    if (!url || !url.includes('facebook.com')) {
+      preview.style.display = 'none';
+      errorDiv.style.display = 'none';
+      return;
+    }
+
+    preview.style.display = 'block';
+    errorDiv.style.display = 'none';
+    previewImg.classList.add('skeleton-avatar');
+    previewImg.src = '';
+    previewName.textContent = 'جاري التحقق...';
+    previewUrl.textContent = url;
+    previewBadge.innerHTML = '<span class="fb-preview-loading"><span class="spinner"></span> جاري التحقق</span>';
+    if (previewCard) previewCard.classList.remove('fb-preview-error');
+
+    this.fbCheckTimeout = setTimeout(() => {
+      this.validateFacebookUrl(url);
+    }, 800);
+  },
+
+  validateFacebookUrl(url) {
+    const preview = document.getElementById('fb-preview');
+    const errorDiv = document.getElementById('fb-error');
+    const previewImg = document.getElementById('fb-preview-img');
+    const previewName = document.getElementById('fb-preview-name');
+    const previewUrl = document.getElementById('fb-preview-url');
+    const previewBadge = document.getElementById('fb-preview-badge');
+    const previewStatus = document.getElementById('fb-preview-status');
+    const previewCard = document.querySelector('.fb-preview-card');
+
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.toLowerCase();
+
+      if (!hostname.includes('facebook.com') && !hostname.includes('fb.com')) {
+        throw new Error('الرابط لازم يكون من فيسبوك');
+      }
+
+      let username = '';
+      const path = urlObj.pathname.replace(/^\//, '').replace(/\/$/, '');
+
+      if (path.startsWith('profile.php')) {
+        const idMatch = path.match(/id=(\d+)/);
+        if (idMatch) username = idMatch[1];
+      } else if (path.includes('people/')) {
+        const peopleMatch = path.match(/people\/([^/]+)/);
+        if (peopleMatch) username = peopleMatch[1];
+      } else {
+        const parts = path.split('/').filter(p => p);
+        if (parts.length > 0 && !['pages', 'groups', 'events', 'watch'].includes(parts[0])) {
+          username = parts[0];
+        }
+      }
+
+      if (!username) {
+        throw new Error('تعذر استخراج اسم المستخدم من الرابط');
+      }
+
+      const reserved = ['home', 'login', 'logout', 'settings', 'help', 'about', 'privacy', 'terms', 'developers', 'business', 'ads', 'media', 'watch', 'marketplace', 'gaming', 'jobs', 'news', 'weather', 'safety', 'community', 'fundraisers', 'donate', 'blood', 'birthdays', 'memories', 'saved', 'pages', 'groups', 'events', 'friends', 'messages', 'notifications', 'search', 'reel', 'story', 'live', 'shop'];
+
+      if (reserved.includes(username.toLowerCase())) {
+        throw new Error('هذا ليس رابط بروفايل شخصي');
+      }
+
+      // Show preview with Facebook Graph API image
+      previewImg.classList.remove('skeleton-avatar');
+      previewImg.src = 'https://graph.facebook.com/' + username + '/picture?type=large';
+      previewImg.onerror = () => {
+        previewImg.src = 'assets/icon-192x192.png';
+        previewImg.style.padding = '8px';
+        previewImg.style.background = 'rgba(255,255,255,.1)';
+      };
+      previewImg.onload = () => {
+        previewImg.style.padding = '0';
+        previewImg.style.background = 'transparent';
+      };
+
+      previewName.textContent = username;
+      previewUrl.textContent = url;
+      previewBadge.innerHTML = '✓ رابط بروفايل صحيح';
+      previewStatus.textContent = '✓';
+      previewStatus.style.background = 'var(--green)';
+      if (previewCard) previewCard.classList.remove('fb-preview-error');
+
+      errorDiv.style.display = 'none';
+
+    } catch (e) {
+      preview.style.display = 'block';
+      previewImg.classList.remove('skeleton-avatar');
+      previewImg.src = 'assets/icon-192x192.png';
+      previewImg.style.padding = '8px';
+      previewImg.style.background = 'rgba(255,255,255,.1)';
+      previewName.textContent = 'خطأ في الرابط';
+      previewUrl.textContent = url;
+      previewBadge.innerHTML = '✕ رابط غير صحيح';
+      previewStatus.textContent = '✕';
+      previewStatus.style.background = 'var(--red)';
+      if (previewCard) previewCard.classList.add('fb-preview-error');
+
+      errorDiv.style.display = 'block';
+      errorDiv.textContent = '⚠️ ' + e.message;
+    }
+  },
 };
 
 // Initialize on load

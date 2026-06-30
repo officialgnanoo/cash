@@ -120,6 +120,111 @@
   flex-shrink: 0;
 }
 </style>
+<style>
+/* Facebook Profile Preview */
+.fb-preview { animation: fadeIn .4s ease; }
+.fb-preview-card {
+  background: linear-gradient(135deg, #1877F2 0%, #0a3d8f 100%);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(24,119,242,.3);
+}
+.fb-preview-card::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+}
+.fb-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+.fb-preview-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.fb-preview-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,.3);
+  object-fit: cover;
+  background: rgba(255,255,255,.1);
+}
+.fb-preview-status {
+  position: absolute;
+  bottom: 2px; right: 2px;
+  width: 20px; height: 20px;
+  background: var(--green);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #fff;
+  border: 2px solid #1877F2;
+}
+.fb-preview-info { flex: 1; }
+.fb-preview-name {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.fb-preview-url {
+  color: rgba(255,255,255,.7);
+  font-size: .78rem;
+  word-break: break-all;
+}
+.fb-preview-actions {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.15);
+  display: flex;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.fb-preview-badge {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: .78rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.fb-preview-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.8);
+  font-size: .85rem;
+}
+.fb-preview-loading .spinner {
+  width: 14px; height: 14px;
+  border-color: rgba(255,255,255,.3);
+  border-top-color: #fff;
+}
+.fb-preview-error {
+  background: rgba(248,81,73,.2) !important;
+  border: 1px solid var(--red) !important;
+}
+.fb-preview-error .fb-preview-name { color: var(--red) !important; }
+.fb-preview-error .fb-preview-badge { background: rgba(248,81,73,.3) !important; color: #fff !important; }
+
+/* Loading skeleton for avatar */
+.fb-preview-avatar.skeleton-avatar {
+  background: linear-gradient(90deg, rgba(255,255,255,.1) 25%, rgba(255,255,255,.2) 50%, rgba(255,255,255,.1) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+</style>
 </head>
 <body>
 
@@ -229,13 +334,34 @@
         </div>
         <div class="form-group">
           <label>رقم الهاتف <em>*</em></label>
-          <input type="tel" id="reg-phone" placeholder="01xxxxxxxxx" inputmode="numeric">
-          <p class="hint">📱 هيتواصل معك عليه لما توصل ٤٠٠ نقطة</p>
+          <input type="tel" id="reg-phone" placeholder="01xxxxxxxxx (11 رقم)" inputmode="numeric">
+          <p class="hint">📱 11 رقم تبدأ بـ 01 — هيتواصل معك عليه لما توصل ٤٠٠ نقطة</p>
         </div>
         <div class="form-group">
           <label>رابط بروفايلك <em>*</em></label>
-          <input type="url" id="reg-fb" placeholder="https://www.facebook.com/yourname">
+          <input type="url" id="reg-fb" placeholder="https://www.facebook.com/yourname" oninput="App.checkFacebookProfile(this.value)">
           <p class="hint">🔗 علشان نراجع إن التفاعل حقيقي</p>
+
+          <!-- Facebook Profile Preview -->
+          <div id="fb-preview" class="fb-preview" style="display:none;margin-top:14px">
+            <div class="fb-preview-card">
+              <div class="fb-preview-header">
+                <div class="fb-preview-avatar-wrap">
+                  <img id="fb-preview-img" src="" alt="صورة البروفايل" class="fb-preview-avatar">
+                  <div class="fb-preview-status" id="fb-preview-status">✓</div>
+                </div>
+                <div class="fb-preview-info">
+                  <div class="fb-preview-name" id="fb-preview-name">جاري التحقق...</div>
+                  <div class="fb-preview-url" id="fb-preview-url"></div>
+                </div>
+              </div>
+              <div class="fb-preview-actions">
+                <span class="fb-preview-badge" id="fb-preview-badge">✓ رابط صحيح</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="fb-error" class="alert error" style="display:none;margin-top:10px;padding:10px 14px;font-size:.85rem"></div>
         </div>
 
         <div class="checkbox-wrap">
