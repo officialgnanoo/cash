@@ -251,6 +251,7 @@ const App = {
 
     const TYPE_LABELS = { like: 'لايك', comment: 'كومنت', share: 'شير', follow: 'متابعة' };
     const TYPE_ICONS = { like: '👍', comment: '💬', share: '🔁', follow: '➕' };
+    const esc = (str) => String(str == null ? '' : str).replace(/\\/g, '\\\\').replace(/'/g, "\\u0027").replace(/"/g, "\\u0022");
 
     container.innerHTML = tasks.map((t, i) => {
       const done = completedIds.includes(t.taskId);
@@ -278,11 +279,11 @@ const App = {
             '<div class="domain">' + domain + '</div>' +
             '<a href="' + t.pageUrl + '" target="_blank" rel="noopener" class="url-text">' + t.pageUrl + '</a>' +
           '</div>' +
-          '<button class="copy-btn" onclick="App.copyLink('' + t.pageUrl + '', this)">📋 نسخ</button>' +
+          '<button class="copy-btn" onclick="App.copyLink(\'' + esc(t.pageUrl) + '\', this)">📋 نسخ</button>' +
         '</div>' +
         (done
           ? '<div class="verify-status success">✅ تم تنفيذ المهمة — تمت الموافقة</div>'
-          : '<button class="task-action-btn" onclick="App.openTaskModal('' + t.taskId + '', '' + t.type + '', '' + t.pageUrl + '', '' + t.title + '')">' + icon + ' افتح الصفحة وارسل إثباتك</button><div class="verify-status" id="vs-' + t.taskId + '"></div>'
+          : '<button class="task-action-btn" onclick="App.openTaskModal(\'' + esc(t.taskId) + '\', \'' + esc(t.type) + '\', \'' + esc(t.pageUrl) + '\', \'' + esc(t.title) + '\')">' + icon + ' افتح الصفحة وارسل إثباتك</button><div class="verify-status" id="vs-' + t.taskId + '"></div>'
         ) +
       '</div>';
     }).join('');
