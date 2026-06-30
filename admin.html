@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#F5A623">
+<meta name="background-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="لوحة التحكم - منصة النقاط">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="لوحة التحكم - منصة النقاط">
+<meta name="description" content="لوحة تحكم منصة النقاط - إدارة المهام والمستخدمين">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Icons -->
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="assets/icon-152x152.png">
+
+<!-- Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<title>لوحة التحكم | منصة النقاط</title>
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+/* Admin logo */
+.admin-logo-img {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(245,166,35,.3);
+}
+/* Splash screen */
+.splash-screen {
+  position: fixed; inset: 0;
+  background: var(--dark);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  transition: opacity .5s ease;
+}
+.splash-screen.hide { opacity: 0; pointer-events: none; }
+.splash-screen img {
+  width: 100px; height: 100px;
+  border-radius: 20px;
+  animation: splashPulse 1.5s ease infinite;
+}
+.splash-screen h1 { font-size: 1.3rem; color: var(--text); }
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+</style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div class="splash-screen" id="splash">
+  <img src="assets/icon-192x192.png" alt="منصة النقاط">
+  <h1>لوحة التحكم</h1>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo-wrap">
+    <img src="assets/icon-72x72.png" alt="منصة النقاط" class="admin-logo-img">
+    <div class="logo-text"><h1>لوحة <span style="color:var(--gold)">التحكم</span></h1></div>
+  </div>
+  <div class="user-nav">
+    <span style="color:var(--text-muted);font-size:.9rem">مرحباً، <strong id="admin-name" style="color:var(--text)"></strong></span>
+    <a href="index.html" class="btn-icon" style="text-decoration:none;font-size:.8rem;width:auto;padding:0 14px">🏠 الموقع</a>
+    <button class="btn-icon" onclick="App.logout()" title="خروج">🚪</button>
+  </div>
+</header>
+
+<div class="container container-wide">
+
+  <!-- Stats Dashboard -->
+  <div class="admin-grid" style="margin-top:24px">
+    <div class="stat-card">
+      <div class="stat-icon blue">👥</div>
+      <div class="stat-info">
+        <h4>إجمالي المستخدمين</h4>
+        <div class="value" id="stat-users">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✓</div>
+      <div class="stat-info">
+        <h4>المستخدمين النشطين</h4>
+        <div class="value" id="stat-active">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon gold">📋</div>
+      <div class="stat-info">
+        <h4>المهام النشطة</h4>
+        <div class="value" id="stat-tasks">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">⏳</div>
+      <div class="stat-info">
+        <h4>طلبات معلقة</h4>
+        <div class="value" id="stat-pending">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✓</div>
+      <div class="stat-info">
+        <h4>إثباتات مقبولة</h4>
+        <div class="value" id="stat-approved">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon gold">💰</div>
+      <div class="stat-info">
+        <h4>إجمالي المدفوع</h4>
+        <div class="value" id="stat-egp">0 ج.م</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Task -->
+  <div class="section-title">✨ نشر مهمة جديدة</div>
+  <div class="card" style="padding:24px">
+    <div class="alert" id="task-alert"></div>
+    <form id="task-form">
+      <div class="admin-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom:0">
+        <div class="form-group">
+          <label>نوع التفاعل <em>*</em></label>
+          <select id="task-type">
+            <option value="like">👍 لايك</option>
+            <option value="comment">💬 كومنت</option>
+            <option value="share">🔁 شير</option>
+            <option value="follow">➕ متابعة</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>عنوان المهمة <em>*</em></label>
+          <input type="text" id="task-title" placeholder="مثال: تفاعل مع بوستنا الجديد">
+        </div>
+        <div class="form-group">
+          <label>الرابط <em>*</em></label>
+          <input type="url" id="task-url" placeholder="https://facebook.com/...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>الوصف</label>
+        <input type="text" id="task-desc" placeholder="وصف مختصر للمهمة...">
+      </div>
+      <button type="submit" class="btn" style="max-width:200px">🚀 نشر المهمة</button>
+    </form>
+  </div>
+
+  <!-- Tasks Table -->
+  <div class="section-title">📋 المهام المنشورة</div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>جميع المهام</h3>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>النوع</th>
+          <th>العنوان</th>
+          <th>الرابط</th>
+          <th>الحالة</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="tasks-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Pending Submissions -->
+  <div class="section-title">⏳ طلبات المراجعة</div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>إثباتات في انتظار الموافقة</h3>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>المستخدم</th>
+          <th>النوع</th>
+          <th>المهمة</th>
+          <th>الإثبات</th>
+          <th>التاريخ</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="submissions-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Users Table -->
+  <div class="section-title">👥 المستخدمين</div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>إدارة المستخدمين والتحذيرات</h3>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>المستخدم</th>
+          <th>الهاتف</th>
+          <th>النقاط</th>
+          <th>الرصيد</th>
+          <th>الحالة</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="users-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Analysis Section -->
+  <div class="section-title">📊 تحليل المهام</div>
+  <div class="card" style="padding:24px">
+    <div class="form-group" style="max-width:400px">
+      <label>اختر مهمة للتحليل</label>
+      <select id="analysis-task">
+        <option value="">اختر مهمة...</option>
+      </select>
+    </div>
+    <div id="analysis-results"></div>
+  </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/admin.js"></script>
+<script>
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW failed:', err));
+  });
+}
+
+// Hide splash
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    if (splash) { splash.classList.add('hide'); setTimeout(() => splash.remove(), 500); }
+  }, 1200);
+});
+</script>
+</body>
+</html>
