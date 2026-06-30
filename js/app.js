@@ -7,6 +7,7 @@
 const App = {
   user: null,
   currentTask: null,
+  fbCheckTimeout: null,
 
   init() {
     NP.initDemoData();
@@ -32,7 +33,7 @@ const App = {
       t.classList.toggle('active', t.dataset.tab === tab);
     });
     document.querySelectorAll('.auth-panel').forEach(p => {
-      p.classList.toggle('active', p.id === `auth-${tab}`);
+      p.classList.toggle('active', p.id === 'auth-' + tab);
     });
   },
 
@@ -140,7 +141,8 @@ const App = {
     document.getElementById('page-tasks').style.display = 'none';
     document.getElementById('page-landing').style.display = 'flex';
     document.getElementById('header-user').style.display = 'none';
-    document.getElementById('admin-link').style.display = 'none';
+    const adminLink = document.getElementById('admin-link');
+    if (adminLink) adminLink.style.display = 'none';
     this.switchAuth('login');
     document.getElementById('login-username').value = '';
     document.getElementById('login-password').value = '';
@@ -164,7 +166,8 @@ const App = {
     }
 
     if (user.isAdmin) {
-      document.getElementById('admin-link').style.display = 'inline-flex';
+      const adminLink = document.getElementById('admin-link');
+      if (adminLink) adminLink.style.display = 'inline-flex';
     }
 
     this.updatePointsUI(user.points);
@@ -192,10 +195,11 @@ const App = {
     if (result.granted) {
       this.user.points = result.points;
       this.updatePointsUI(result.points);
-      document.getElementById('daily-bonus').style.display = 'inline-flex';
-      document.getElementById('daily-bonus').innerHTML = 
-        `🎁 نقطة يومية! استمرارك ${result.streak} أيام متتالية`;
-
+      const dailyBonus = document.getElementById('daily-bonus');
+      if (dailyBonus) {
+        dailyBonus.style.display = 'inline-flex';
+        dailyBonus.innerHTML = '🎁 نقطة يومية! استمرارك ' + result.streak + ' أيام متتالية';
+      }
       this.showToast('✅ حصلت على نقطة يومية بسبب انتظامك!', 'success');
       document.getElementById('hdr-points').textContent = result.points + ' نقطة';
     }
@@ -208,14 +212,14 @@ const App = {
 
     document.getElementById('pts-display').textContent = pts;
     document.getElementById('pts-name-disp').textContent = this.user.name;
-    document.getElementById('pts-value').textContent = `= ${egpValue} ج.م`;
+    document.getElementById('pts-value').textContent = '= ' + egpValue + ' ج.م';
     document.getElementById('pts-bar').style.width = progress + '%';
-    document.getElementById('pts-label').textContent = `${pts} / ${config.CASH_TARGET} نقطة للسحب`;
+    document.getElementById('pts-label').textContent = pts + ' / ' + config.CASH_TARGET + ' نقطة للسحب';
 
     const cashBadge = document.getElementById('cash-badge');
     if (pts >= config.CASH_TARGET) {
       cashBadge.style.display = 'inline-flex';
-      cashBadge.innerHTML = `🎉 وصلت للسحب! ${config.CASH_TARGET} نقطة = ${config.CASH_VALUE_EGP}ج كاش`;
+      cashBadge.innerHTML = '🎉 وصلت للسحب! ' + config.CASH_TARGET + ' نقطة = ' + config.CASH_VALUE_EGP + 'ج كاش';
     } else {
       cashBadge.style.display = 'none';
     }
@@ -225,9 +229,7 @@ const App = {
 
   async loadTasks() {
     const container = document.getElementById('tasks-container');
-    container.innerHTML = `
-      <div class="skeleton"><div class="sk-line"></div><div class="sk-line w60"></div><div class="sk-line w40"></div></div>
-      <div class="skeleton"><div class="sk-line"></div><div class="sk-line w60"></div><div class="sk-line w40"></div></div>`;
+    container.innerHTML = '<div class="skeleton"><div class="sk-line"></div><div class="sk-line w60"></div><div class="sk-line w40"></div></div><div class="skeleton"><div class="sk-line"></div><div class="sk-line w60"></div><div class="sk-line w40"></div></div>';
 
     await this.delay(400);
 
@@ -243,12 +245,7 @@ const App = {
     const container = document.getElementById('tasks-container');
 
     if (!tasks.length) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">🎯</div>
-          <h4>مفيش مهام حالياً</h4>
-          <p>هيتم إضافة مهام جديدة قريباً، تابع الموقع.</p>
-        </div>`;
+      container.innerHTML = '<div class="empty-state"><div class="icon">🎯</div><h4>مفيش مهام حالياً</h4><p>هيتم إضافة مهام جديدة قريباً، تابع الموقع.</p></div>';
       return;
     }
 
@@ -262,38 +259,32 @@ const App = {
       const egpPerPoint = (NP.CONFIG.POINT_VALUE_EGP).toFixed(2);
       const domain = this.extractDomain(t.pageUrl);
 
-      return `
-      <div class="task-card ${done ? 'done' : ''} ${hasWarning ? 'warned' : ''} animate-in" style="animation-delay:${i*0.1}s" id="card-${t.taskId}">
-        <div class="task-top">
-          <div class="task-meta">
-            <span class="task-badge ${t.type}">${icon} ${lbl}</span>
-            <div class="task-title">${t.title}</div>
-            ${t.description ? `<div class="task-desc">${t.description}</div>` : ''}
-          </div>
-          <div class="task-pts-badge">
-            <div class="num">${NP.CONFIG.POINTS_PER_ACTION}</div>
-            <div class="lbl">نقطة</div>
-            <div class="val">${egpPerPoint} ج.م</div>
-          </div>
-        </div>
-
-        <div class="link-preview">
-          <div class="link-favicon">${icon}</div>
-          <div class="link-info">
-            <div class="domain">${domain}</div>
-            <a href="${t.pageUrl}" target="_blank" rel="noopener" class="url-text">${t.pageUrl}</a>
-          </div>
-          <button class="copy-btn" onclick="App.copyLink('${t.pageUrl}', this)">📋 نسخ</button>
-        </div>
-
-        ${done
-          ? `<div class="verify-status success">✅ تم تنفيذ المهمة — تمت الموافقة</div>`
-          : `<button class="task-action-btn" onclick="App.openTaskModal('${t.taskId}', '${t.type}', '${t.pageUrl}', '${t.title}')">
-              ${icon} افتح الصفحة وارسل إثباتك
-             </button>
-             <div class="verify-status" id="vs-${t.taskId}"></div>`
-        }
-      </div>`;
+      return '<div class="task-card ' + (done ? 'done' : '') + ' ' + (hasWarning ? 'warned' : '') + ' animate-in" style="animation-delay:' + (i*0.1) + 's" id="card-' + t.taskId + '">' +
+        '<div class="task-top">' +
+          '<div class="task-meta">' +
+            '<span class="task-badge ' + t.type + '">' + icon + ' ' + lbl + '</span>' +
+            '<div class="task-title">' + t.title + '</div>' +
+            (t.description ? '<div class="task-desc">' + t.description + '</div>' : '') +
+          '</div>' +
+          '<div class="task-pts-badge">' +
+            '<div class="num">' + NP.CONFIG.POINTS_PER_ACTION + '</div>' +
+            '<div class="lbl">نقطة</div>' +
+            '<div class="val">' + egpPerPoint + ' ج.م</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="link-preview">' +
+          '<div class="link-favicon">' + icon + '</div>' +
+          '<div class="link-info">' +
+            '<div class="domain">' + domain + '</div>' +
+            '<a href="' + t.pageUrl + '" target="_blank" rel="noopener" class="url-text">' + t.pageUrl + '</a>' +
+          '</div>' +
+          '<button class="copy-btn" onclick="App.copyLink('' + t.pageUrl + '', this)">📋 نسخ</button>' +
+        '</div>' +
+        (done
+          ? '<div class="verify-status success">✅ تم تنفيذ المهمة — تمت الموافقة</div>'
+          : '<button class="task-action-btn" onclick="App.openTaskModal('' + t.taskId + '', '' + t.type + '', '' + t.pageUrl + '', '' + t.title + '')">' + icon + ' افتح الصفحة وارسل إثباتك</button><div class="verify-status" id="vs-' + t.taskId + '"></div>'
+        ) +
+      '</div>';
     }).join('');
   },
 
@@ -324,10 +315,8 @@ const App = {
     const TYPE_LABELS = { like: 'لايك', comment: 'كومنت', share: 'شير', follow: 'متابعة' };
     const TYPE_ICONS = { like: '👍', comment: '💬', share: '🔁', follow: '➕' };
 
-    document.getElementById('modal-info').innerHTML = `
-      المهمة: <strong>${title}</strong><br>
-      النوع: ${TYPE_ICONS[type] || ''} ${TYPE_LABELS[type] || type} — 
-      <strong style="color:var(--gold)">${NP.CONFIG.POINTS_PER_ACTION} نقطة = ${NP.CONFIG.POINT_VALUE_EGP} ج.م</strong>`;
+    document.getElementById('modal-info').innerHTML = 
+      'المهمة: <strong>' + title + '</strong><br>النوع: ' + (TYPE_ICONS[type] || '') + ' ' + (TYPE_LABELS[type] || type) + ' — <strong style="color:var(--gold)">' + NP.CONFIG.POINTS_PER_ACTION + ' نقطة = ' + NP.CONFIG.POINT_VALUE_EGP + ' ج.م</strong>';
 
     this.hideAlert('modal-alert');
     document.getElementById('modal-proof').value = '';
@@ -399,30 +388,22 @@ const App = {
     const topUsers = leaderboard.slice(0, 10);
 
     if (topUsers.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state" style="padding: 32px 20px;">
-          <div class="icon">🏆</div>
-          <h4>لا يوجد مستخدمين بعد</h4>
-        </div>`;
+      container.innerHTML = '<div class="empty-state" style="padding: 32px 20px;"><div class="icon">🏆</div><h4>لا يوجد مستخدمين بعد</h4></div>';
       return;
     }
 
     container.innerHTML = topUsers.map((u, i) => {
       const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
       const isMe = u.username === this.user.username;
-      return `
-      <div class="leaderboard-item ${isMe ? 'animate-in' : ''}" style="${isMe ? 'background:rgba(245,166,35,.08)' : ''}">
-        <div class="lb-rank ${rankClass}">${i + 1}</div>
-        <img src="assets/icon-72x72.png" alt="${u.name}" class="lb-avatar-img" style="width:40px;height:40px">
-        <div class="lb-info">
-          <div class="name">${u.name} ${isMe ? '<span style="color:var(--gold)">(أنت)</span>' : ''}</div>
-          <div class="username">@${u.username}</div>
-        </div>
-        <div class="lb-points">
-          ${u.points}
-          <div class="egp">${u.earnings} ج.م</div>
-        </div>
-      </div>`;
+      return '<div class="leaderboard-item ' + (isMe ? 'animate-in' : '') + '" style="' + (isMe ? 'background:rgba(245,166,35,.08)' : '') + '">' +
+        '<div class="lb-rank ' + rankClass + '">' + (i + 1) + '</div>' +
+        '<img src="assets/icon-72x72.png" alt="' + u.name + '" class="lb-avatar-img" style="width:40px;height:40px">' +
+        '<div class="lb-info">' +
+          '<div class="name">' + u.name + (isMe ? ' <span style="color:var(--gold)">(أنت)</span>' : '') + '</div>' +
+          '<div class="username">@' + u.username + '</div>' +
+        '</div>' +
+        '<div class="lb-points">' + u.points + '<div class="egp">' + u.earnings + ' ج.م</div></div>' +
+      '</div>';
     }).join('');
   },
 
@@ -434,13 +415,7 @@ const App = {
       const banner = document.getElementById('warn-banner');
       if (banner) {
         banner.style.display = 'flex';
-        banner.innerHTML = `
-          <span>⚠️</span>
-          <div>
-            <strong>تحذير!</strong> ${userWarnings.length} تحذير بسبب عدم الالتزام بالشروط.
-            ${this.user.warnings >= 2 ? '<br><span style="color:var(--red)">عند الوصول لـ 3 تحذيرات سيتم حظر حسابك!</span>' : ''}
-          </div>
-        `;
+        banner.innerHTML = '<span>⚠️</span><div><strong>تحذير!</strong> ' + userWarnings.length + ' تحذير بسبب عدم الالتزام بالشروط.' + (this.user.warnings >= 2 ? '<br><span style="color:var(--red)">عند الوصول لـ 3 تحذيرات سيتم حظر حسابك!</span>' : '') + '</div>';
       }
 
       const allWarnings = warnings.map(w => {
@@ -459,48 +434,7 @@ const App = {
     document.getElementById('terms-modal').classList.remove('show');
   },
 
-  showAlert(id, msg, type) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.className = 'alert ' + type + ' show';
-    el.innerHTML = msg;
-  },
-
-  hideAlert(id) {
-    const el = document.getElementById(id);
-    if (el) el.className = 'alert';
-  },
-
-  setBtn(id, html, disabled) {
-    const b = document.getElementById(id);
-    if (!b) return;
-    b.innerHTML = html;
-    b.disabled = disabled;
-  },
-
-  delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  },
-
-  showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container') || this.createToastContainer();
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = message;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
-  },
-
-  createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-    return container;
-  }
   // ==================== FACEBOOK PROFILE CHECK ====================
-  fbCheckTimeout: null,
-
   checkFacebookProfile(url) {
     clearTimeout(this.fbCheckTimeout);
 
@@ -514,18 +448,20 @@ const App = {
     const previewCard = document.querySelector('.fb-preview-card');
 
     if (!url || !url.includes('facebook.com')) {
-      preview.style.display = 'none';
-      errorDiv.style.display = 'none';
+      if (preview) preview.style.display = 'none';
+      if (errorDiv) errorDiv.style.display = 'none';
       return;
     }
 
-    preview.style.display = 'block';
-    errorDiv.style.display = 'none';
-    previewImg.classList.add('skeleton-avatar');
-    previewImg.src = '';
-    previewName.textContent = 'جاري التحقق...';
-    previewUrl.textContent = url;
-    previewBadge.innerHTML = '<span class="fb-preview-loading"><span class="spinner"></span> جاري التحقق</span>';
+    if (preview) preview.style.display = 'block';
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (previewImg) {
+      previewImg.classList.add('skeleton-avatar');
+      previewImg.src = '';
+    }
+    if (previewName) previewName.textContent = 'جاري التحقق...';
+    if (previewUrl) previewUrl.textContent = url;
+    if (previewBadge) previewBadge.innerHTML = '<span class="fb-preview-loading"><span class="spinner"></span> جاري التحقق</span>';
     if (previewCard) previewCard.classList.remove('fb-preview-error');
 
     this.fbCheckTimeout = setTimeout(() => {
@@ -577,52 +513,102 @@ const App = {
         throw new Error('هذا ليس رابط بروفايل شخصي');
       }
 
-      // Show preview with Facebook Graph API image
-      previewImg.classList.remove('skeleton-avatar');
-      previewImg.src = 'https://graph.facebook.com/' + username + '/picture?type=large';
-      previewImg.onerror = () => {
+      if (previewImg) {
+        previewImg.classList.remove('skeleton-avatar');
+        previewImg.src = 'https://graph.facebook.com/' + username + '/picture?type=large';
+        previewImg.onerror = function() {
+          this.src = 'assets/icon-192x192.png';
+          this.style.padding = '8px';
+          this.style.background = 'rgba(255,255,255,.1)';
+        };
+        previewImg.onload = function() {
+          this.style.padding = '0';
+          this.style.background = 'transparent';
+        };
+      }
+
+      if (previewName) previewName.textContent = username;
+      if (previewUrl) previewUrl.textContent = url;
+      if (previewBadge) previewBadge.innerHTML = '✓ رابط بروفايل صحيح';
+      if (previewStatus) {
+        previewStatus.textContent = '✓';
+        previewStatus.style.background = 'var(--green)';
+      }
+      if (previewCard) previewCard.classList.remove('fb-preview-error');
+      if (errorDiv) errorDiv.style.display = 'none';
+
+    } catch (e) {
+      if (preview) preview.style.display = 'block';
+      if (previewImg) {
+        previewImg.classList.remove('skeleton-avatar');
         previewImg.src = 'assets/icon-192x192.png';
         previewImg.style.padding = '8px';
         previewImg.style.background = 'rgba(255,255,255,.1)';
-      };
-      previewImg.onload = () => {
-        previewImg.style.padding = '0';
-        previewImg.style.background = 'transparent';
-      };
-
-      previewName.textContent = username;
-      previewUrl.textContent = url;
-      previewBadge.innerHTML = '✓ رابط بروفايل صحيح';
-      previewStatus.textContent = '✓';
-      previewStatus.style.background = 'var(--green)';
-      if (previewCard) previewCard.classList.remove('fb-preview-error');
-
-      errorDiv.style.display = 'none';
-
-    } catch (e) {
-      preview.style.display = 'block';
-      previewImg.classList.remove('skeleton-avatar');
-      previewImg.src = 'assets/icon-192x192.png';
-      previewImg.style.padding = '8px';
-      previewImg.style.background = 'rgba(255,255,255,.1)';
-      previewName.textContent = 'خطأ في الرابط';
-      previewUrl.textContent = url;
-      previewBadge.innerHTML = '✕ رابط غير صحيح';
-      previewStatus.textContent = '✕';
-      previewStatus.style.background = 'var(--red)';
+      }
+      if (previewName) previewName.textContent = 'خطأ في الرابط';
+      if (previewUrl) previewUrl.textContent = url;
+      if (previewBadge) previewBadge.innerHTML = '✕ رابط غير صحيح';
+      if (previewStatus) {
+        previewStatus.textContent = '✕';
+        previewStatus.style.background = 'var(--red)';
+      }
       if (previewCard) previewCard.classList.add('fb-preview-error');
-
-      errorDiv.style.display = 'block';
-      errorDiv.textContent = '⚠️ ' + e.message;
+      if (errorDiv) {
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = '⚠️ ' + e.message;
+      }
     }
   },
+
+  // ==================== UTILITIES ====================
+  showAlert(id, msg, type) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'alert ' + type + ' show';
+    el.innerHTML = msg;
+  },
+
+  hideAlert(id) {
+    const el = document.getElementById(id);
+    if (el) el.className = 'alert';
+  },
+
+  setBtn(id, html, disabled) {
+    const b = document.getElementById(id);
+    if (!b) return;
+    b.innerHTML = html;
+    b.disabled = disabled;
+  },
+
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  },
+
+  showToast(message, type) {
+    const container = document.getElementById('toast-container') || this.createToastContainer();
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + (type || 'info');
+    toast.innerHTML = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  },
+
+  createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+    return container;
+  }
 };
 
 // Initialize on load
-document.addEventListener('DOMContentLoaded', () => App.init());
+document.addEventListener('DOMContentLoaded', function() {
+  App.init();
+});
 
 // Close modal on overlay click
-document.addEventListener('click', (e) => {
+document.addEventListener('click', function(e) {
   if (e.target.classList.contains('modal-overlay')) {
     e.target.classList.remove('show');
   }
