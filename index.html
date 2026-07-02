@@ -334,7 +334,7 @@
         </div>
         <div class="form-group">
           <label>رقم الهاتف <em>*</em></label>
-          <input type="tel" id="reg-phone" placeholder="01xxxxxxxxx (11 رقم)" inputmode="numeric">
+          <input type="tel" id="reg-phone" placeholder="01xxxxxxxxx (11 رقم)" inputmode="numeric" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,11)">
           <p class="hint">📱 11 رقم تبدأ بـ 01 — هيتواصل معك عليه لما توصل ٤٠٠ نقطة</p>
         </div>
         <div class="form-group">
